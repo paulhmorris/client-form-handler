@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@sentry/cli": "^2.41.1",
+    "@sentry/node": "^8.51.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -18,7 +20,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node build/server.js"
+    "build": "tsc && npm run sentry:sourcemaps",
+    "start": "node build/server.js",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org cosmic-labs --project client-form-handler ./build && sentry-cli sourcemaps upload --org cosmic-labs --project client-form-handler ./build"
   }
 }

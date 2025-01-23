@@ -1,3 +1,6 @@
+import "./sentry";
+
+import * as Sentry from "@sentry/node";
 import cors, { CorsOptions } from "cors";
 import "dotenv/config";
 import express from "express";
@@ -141,6 +144,8 @@ app.post("/api/v1/connect", async (req, res) => {
     res.status(500).json({ message: "An error occurred while sending the email." });
   }
 });
+
+Sentry.setupExpressErrorHandler(app);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
