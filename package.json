@@ -7,6 +7,7 @@
     "resend": "^4.1.1"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.3",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/morgan": "^1.9.9",

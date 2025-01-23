@@ -9,15 +9,30 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const app = express();
 
 const corsOptions: CorsOptions = {
-  origin: ["https://upheldministries.org"],
+  origin: (origin, callback) => {
+    const allowedDomains = [
+      "https://upheldministries.org", // Main domain
+    ];
+
+    // Allow any subdomain of upheldministries.org
+    const regex = /^https:\/\/([a-zA-Z0-9-]+\.)?upheldministries\.org$/;
+
+    // Allow localhost in development mode
+    if (process.env.NODE_ENV === "development" && origin?.startsWith("http://localhost")) {
+      return callback(null, true);
+    }
+
+    // Allow main domain or any matching subdomain
+    if (allowedDomains.includes(origin as string) || (origin && regex.test(origin))) {
+      return callback(null, true);
+    }
+
+    // Reject other origins
+    callback(new Error("Not allowed by CORS"));
+  },
 };
 
-if (process.env.NODE_ENV === "development") {
-  // @ts-ignore
-  corsOptions.origin?.push("http://localhost:*");
-}
-
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
