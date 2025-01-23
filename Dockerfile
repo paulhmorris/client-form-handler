@@ -12,6 +12,9 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV="production"
 
+# Accept SENTRY_AUTH_TOKEN as a build argument
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
