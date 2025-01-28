@@ -44,7 +44,7 @@ const clients = [
   {
     id: "136cf087-2d7e-4494-86b8-4aee13f0f3d0",
     name: "Upheld Ministries",
-    email: "paulh.morris@gmail.com",
+    email: "kathystigall@gmail.com",
   },
 ];
 
