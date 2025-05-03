@@ -46,6 +46,11 @@ const clients = [
     name: "Upheld Ministries",
     email: "kathystigall@gmail.com",
   },
+  {
+    id: "63dede83-0e9a-47ee-b003-95ca98847ec7",
+    name: "Maggie's First Birthday",
+    email: "harrietamorris19@gmail.com",
+  },
 ];
 
 app.post("/api/v1/connect", async (req, res) => {
