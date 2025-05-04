@@ -60,10 +60,10 @@ app.post("/api/v1/connect", async (req, res) => {
     const clientId = formData.clientId;
     const cfResponse = formData["cf-turnstile-response"];
 
-    console.info("Form Data:", formData);
-
     delete formData.clientId;
     delete formData["cf-turnstile-response"];
+
+    console.info("Form Data:", formData);
 
     if (!clientId) {
       console.error("Client ID is missing.");
