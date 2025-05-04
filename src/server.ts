@@ -13,12 +13,12 @@ const app = express();
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    const allowedDomains = [
-      "https://upheldministries.org", // Main domain
-    ];
+    const allowedDomains = ["https://upheldministries.org", "https://maggiemorris.me"];
 
-    // Allow any subdomain of upheldministries.org
-    const regex = /^https:\/\/([a-zA-Z0-9-]+\.)?upheldministries\.org$/;
+    // Allow any subdomain of allowedDomains
+    const subdomainsRegex = new RegExp(
+      `^https?:\/\/([a-zA-Z0-9-]+\\.)?(${allowedDomains.join("|").replace(/\./g, "\\.")})$`
+    );
 
     // Allow localhost in development mode
     if (process.env.NODE_ENV === "development" && origin?.startsWith("http://localhost")) {
@@ -26,11 +26,12 @@ const corsOptions: CorsOptions = {
     }
 
     // Allow main domain or any matching subdomain
-    if (allowedDomains.includes(origin as string) || (origin && regex.test(origin))) {
+    if (allowedDomains.includes(origin as string) || (origin && subdomainsRegex.test(origin))) {
       return callback(null, true);
     }
 
     // Reject other origins
+    console.warn(`CORS request from disallowed origin: ${origin}`);
     callback(new Error("Not allowed by CORS"));
   },
 };
@@ -59,15 +60,19 @@ app.post("/api/v1/connect", async (req, res) => {
     const clientId = formData.clientId;
     const cfResponse = formData["cf-turnstile-response"];
 
+    console.info("Form Data:", formData);
+
     delete formData.clientId;
     delete formData["cf-turnstile-response"];
 
     if (!clientId) {
+      console.error("Client ID is missing.");
       res.status(400).json({ message: "Client ID is required." });
       return;
     }
 
     if (!cfResponse) {
+      console.error("Turnstile response is missing from form data.");
       res.status(400).json({ message: "Turnstile response is required." });
       return;
     }
@@ -95,6 +100,7 @@ app.post("/api/v1/connect", async (req, res) => {
     const turnstileResult = await turnstileVerify.json();
 
     if (!turnstileResult.success) {
+      console.error("Turnstile verification failed:", turnstileResult);
       res.status(400).json({ message: "Verification failed." });
       return;
     }
@@ -128,6 +134,7 @@ app.post("/api/v1/connect", async (req, res) => {
     // Send the email
     const client = clients.find((client) => client.id === clientId);
     if (!client) {
+      console.error("Invalid client ID:", clientId);
       res.status(400).json({ message: "Invalid client ID." });
       return;
     }
@@ -140,9 +147,11 @@ app.post("/api/v1/connect", async (req, res) => {
     });
 
     if (error) {
+      console.error("Error sending email:", error);
       throw error;
     }
 
+    console.info("Email sent successfully to:", client.email);
     res.status(200).json({ message: "Form submission emailed successfully!" });
   } catch (error) {
     console.error("Error sending email:", error);
