@@ -13,7 +13,7 @@ const app = express();
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    const allowedDomains = ["https://upheldministries.org", "https://maggiemorris.me"];
+    const allowedDomains = ["https://upheldministries.org", "https://maggiemorris.me", "https://teddymorris.com"];
 
     // Allow any subdomain of allowedDomains
     const subdomainsRegex = new RegExp(
@@ -50,6 +50,11 @@ const clients = [
   {
     id: "63dede83-0e9a-47ee-b003-95ca98847ec7",
     name: "Maggie's First Birthday",
+    email: "harrietamorris19@gmail.com",
+  },
+  {
+    id: "92aa2ba2-320c-4ba5-9b05-469b09afbe20",
+    name: "Teddy's Fourth Birthday",
     email: "harrietamorris19@gmail.com",
   },
 ];
@@ -140,7 +145,7 @@ app.post("/api/v1/connect", async (req, res) => {
     }
 
     const { error } = await resend.emails.send({
-      from: `${client.name} <forms@getcosmic.dev>`,
+      from: `${client.name} <forms@paulmorris.dev>`,
       to: client.email,
       subject: "New Form Submission!",
       html: htmlBody,
