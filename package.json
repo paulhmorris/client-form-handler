@@ -20,7 +20,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc && npm run sentry:sourcemaps",
+    "build": "tsc",
     "start": "node build/server.js",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org cosmic-labs --project client-form-handler ./build && sentry-cli sourcemaps upload --org cosmic-labs --project client-form-handler ./build"
   }
