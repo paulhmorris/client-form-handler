@@ -17,7 +17,7 @@ const corsOptions: CorsOptions = {
       "https://upheldministries.org",
       "https://maggiemorris.me",
       "https://teddymorris.com",
-      "https://covenant-cre.paulh-morris.workers.dev",
+      "https://covenantcre.com",
     ];
 
     // Allow any subdomain of allowedDomains
