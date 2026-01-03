@@ -13,7 +13,12 @@ const app = express();
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    const allowedDomains = ["https://upheldministries.org", "https://maggiemorris.me", "https://teddymorris.com"];
+    const allowedDomains = [
+      "https://upheldministries.org",
+      "https://maggiemorris.me",
+      "https://teddymorris.com",
+      "https://covenant-cre.paulh-morris.workers.dev/",
+    ];
 
     // Allow any subdomain of allowedDomains
     const subdomainsRegex = new RegExp(
@@ -56,6 +61,11 @@ const clients = [
     id: "92aa2ba2-320c-4ba5-9b05-469b09afbe20",
     name: "Teddy's Fourth Birthday",
     email: "harrietamorris19@gmail.com",
+  },
+  {
+    id: "c2b161f8-0254-4929-add1-e36e3d672674",
+    name: "Covenant CRE",
+    email: "info@covenantcre.com",
   },
 ];
 
@@ -141,6 +151,14 @@ app.post("/api/v1/connect", async (req, res) => {
     if (!client) {
       console.error("Invalid client ID:", clientId);
       res.status(400).json({ message: "Invalid client ID." });
+      return;
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      console.info("Development mode: Email content:");
+      console.info("To:", client.email);
+      console.info("Subject: New Form Submission!");
+      res.status(200).json({ message: "Form submission processed (development mode)." });
       return;
     }
 
