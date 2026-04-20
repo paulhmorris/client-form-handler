@@ -44,18 +44,23 @@ const corsOptions: CorsOptions = {
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
+  // Skip logging for requests without Origin header (not CORS requests)
+  if (!origin) {
+    return next();
+  }
+
   // Allow any subdomain of allowedDomains
   const subdomainsRegex = new RegExp(
     `^https?:\/\/([a-zA-Z0-9-]+\\.)?(${allowedDomains.join("|").replace(/\./g, "\\.")})$`,
   );
 
   // Allow localhost in development mode
-  if (process.env.NODE_ENV === "development" && origin?.startsWith("http://localhost")) {
+  if (process.env.NODE_ENV === "development" && origin.startsWith("http://localhost")) {
     return next();
   }
 
   // Allow main domain or any matching subdomain
-  if (allowedDomains.includes(origin as string) || (origin && subdomainsRegex.test(origin))) {
+  if (allowedDomains.includes(origin) || subdomainsRegex.test(origin)) {
     return next();
   }
 
