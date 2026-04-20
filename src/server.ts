@@ -11,18 +11,18 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 
+const allowedDomains = [
+  "https://upheldministries.org",
+  "https://maggiemorris.me",
+  "https://teddymorris.com",
+  "https://covenantcre.com",
+];
+
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    const allowedDomains = [
-      "https://upheldministries.org",
-      "https://maggiemorris.me",
-      "https://teddymorris.com",
-      "https://covenantcre.com",
-    ];
-
     // Allow any subdomain of allowedDomains
     const subdomainsRegex = new RegExp(
-      `^https?:\/\/([a-zA-Z0-9-]+\\.)?(${allowedDomains.join("|").replace(/\./g, "\\.")})$`
+      `^https?:\/\/([a-zA-Z0-9-]+\\.)?(${allowedDomains.join("|").replace(/\./g, "\\.")})$`,
     );
 
     // Allow localhost in development mode
@@ -35,11 +35,36 @@ const corsOptions: CorsOptions = {
       return callback(null, true);
     }
 
-    // Reject other origins
-    console.warn(`CORS request from disallowed origin: ${origin}`);
-    callback(new Error("Not allowed by CORS"));
+    // Log disallowed origins but allow the request
+    callback(null, true);
   },
 };
+
+// Middleware to log CORS requests from disallowed origins
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Allow any subdomain of allowedDomains
+  const subdomainsRegex = new RegExp(
+    `^https?:\/\/([a-zA-Z0-9-]+\\.)?(${allowedDomains.join("|").replace(/\./g, "\\.")})$`,
+  );
+
+  // Allow localhost in development mode
+  if (process.env.NODE_ENV === "development" && origin?.startsWith("http://localhost")) {
+    return next();
+  }
+
+  // Allow main domain or any matching subdomain
+  if (allowedDomains.includes(origin as string) || (origin && subdomainsRegex.test(origin))) {
+    return next();
+  }
+
+  // Log disallowed origins with additional request details
+  console.warn(
+    `CORS request from disallowed origin: ${origin}, IP: ${req.ip}, User-Agent: ${req.headers["user-agent"]}, URL: ${req.url}, Method: ${req.method}`,
+  );
+  next();
+});
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -54,7 +79,7 @@ const clients = [
   },
   {
     id: "63dede83-0e9a-47ee-b003-95ca98847ec7",
-    name: "Maggie's First Birthday",
+    name: "Maggie's Second Birthday",
     email: "harrietamorris19@gmail.com",
   },
   {
@@ -95,15 +120,18 @@ app.post("/api/v1/connect", async (req, res) => {
     // Transform formData: change "on" to "yes" and convert keys to readable text
     const transformedData = Object.entries(formData)
       .filter(([key, value]) => typeof value !== "undefined" && value !== "")
-      .reduce((acc, [key, value]) => {
-        const readableKey = camelCaseToReadable(key);
-        const transformedValue = value === "on" ? "Yes" : value;
-        // @ts-ignore
-        acc[readableKey] = Array.isArray(transformedValue)
-          ? transformedValue.map((v) => (v === "on" ? "Yes" : v))
-          : transformedValue;
-        return acc;
-      }, {} as Record<string, string | string[]>);
+      .reduce(
+        (acc, [key, value]) => {
+          const readableKey = camelCaseToReadable(key);
+          const transformedValue = value === "on" ? "Yes" : value;
+          // @ts-ignore
+          acc[readableKey] = Array.isArray(transformedValue)
+            ? transformedValue.map((v) => (v === "on" ? "Yes" : v))
+            : transformedValue;
+          return acc;
+        },
+        {} as Record<string, string | string[]>,
+      );
 
     // Validate Cloudflare Turnstile
     const turnstileVerify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
@@ -139,7 +167,7 @@ app.post("/api/v1/connect", async (req, res) => {
                     Array.isArray(value) ? value.join(", ") : value
                   }</td>
                 </tr>
-              `
+              `,
             )
             .join("")}
         </tbody>
