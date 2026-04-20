@@ -103,12 +103,18 @@ app.post("/api/v1/connect", async (req, res) => {
   try {
     const formData = req.body;
     const clientId = formData.clientId;
-    const cfResponse = formData["cf-turnstile-response"];
+    const token = formData["cf-turnstile-response"];
 
     delete formData.clientId;
     delete formData["cf-turnstile-response"];
 
     console.info("Form Data:", formData);
+
+    if (!process.env.CF_SECRET_KEY) {
+      console.error("Cloudflare secret key is not configured.");
+      res.status(500).json({ message: "Server configuration error." });
+      return;
+    }
 
     if (!clientId) {
       console.error("Client ID is missing.");
@@ -116,7 +122,7 @@ app.post("/api/v1/connect", async (req, res) => {
       return;
     }
 
-    if (!cfResponse) {
+    if (!token) {
       console.error("Turnstile response is missing from form data.");
       res.status(400).json({ message: "Turnstile response is required." });
       return;
@@ -141,8 +147,11 @@ app.post("/api/v1/connect", async (req, res) => {
     // Validate Cloudflare Turnstile
     const turnstileVerify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `secret=${process.env.CF_SECRET_KEY}&response=${cfResponse}`,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        secret: process.env.CF_SECRET_KEY,
+        response: token,
+      }),
     });
 
     const turnstileResult = await turnstileVerify.json();
