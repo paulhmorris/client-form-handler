@@ -147,11 +147,8 @@ app.post("/api/v1/connect", async (req, res) => {
     // Validate Cloudflare Turnstile
     const turnstileVerify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        secret: process.env.CF_SECRET_KEY,
-        response: token,
-      }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${process.env.CF_SECRET_KEY}&response=${token}`,
     });
 
     const turnstileResult = await turnstileVerify.json();
